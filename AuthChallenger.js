@@ -1,11 +1,25 @@
-const AuthChallenger = (users) => {
-  // This will return True or False
-  return (username, password) => {
-    // This is the password and username that we receive when prompted by our HTML file.
-    return (
-      typeof users[username] !== "undefined" && users[username] === password
-    ); // Logic to see if we can match the username given to a username stored in our JSON file, and if the password matches
+const AuthChallenger = function (knex) {
+  return function (username, password, cb) {
+    let query = knex
+      .select("username")
+      .from("users")
+      .where("username", username)
+      .where("password", password);
+
+    query
+      .then((rows) => {
+        // console.log(rows)
+        if (rows.length === 1) {
+          cb(null, true);
+          //we have found the user with this username and password.
+        } else {
+          cb(null, false);
+          //no such user....
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 };
-
 module.exports = AuthChallenger;
